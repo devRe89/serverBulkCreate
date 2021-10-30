@@ -1,8 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
-require('dotenv').config();
-
+const connectDB = require('../config/dbMongo');
 class Server {
 
     constructor(){
@@ -10,6 +10,7 @@ class Server {
         this.app = express();
         this.middlewares();
         this.routes();
+        connectDB();
     }
 
     middlewares(){

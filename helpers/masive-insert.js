@@ -1,7 +1,9 @@
 const fs = require('fs');
 const csv = require('csvtojson');
+const ConfirmedCase = require('../models/ConfirmedCase');
 
 const convertAllToJson = ( currentDir , [...arrayFiles] ) => {
+
     return new Promise ((res, rej) => {
         let resCsv = [];
         arrayFiles.map( ( file ) => {
@@ -9,7 +11,7 @@ const convertAllToJson = ( currentDir , [...arrayFiles] ) => {
             const fullUrl = currentDir + file;
             csv()
                 .fromFile(fullUrl)
-                .subscribe( jsonCsv =>{
+                .subscribe( jsonCsv => {
                     jsonCsv.fechaCaso = fileDate;
                     resCsv.push(jsonCsv);
                 })
@@ -17,14 +19,31 @@ const convertAllToJson = ( currentDir , [...arrayFiles] ) => {
                     res(resCsv);
                 });
         });
-    }).catch(err =>{ throw err} )
+    }).catch(err =>{ throw err} );
+
 }
 
 const createBulkData = async arrayJson => {
     
+    const bulk = ConfirmedCase.collection.initializeOrderedBulkOp();
+    for (const item of arrayJson) {
+        bulk.insert({
+            region:             item["Region"],
+            codigo_region:      Number(item["Codigo region"]),
+            comuna:             item["Comuna"],
+            codigo_comuna:      Number(item["Codigo comuna"]),
+            poblacion:          Number(item["Poblacion"]),
+            casos_confirmados:  Number(item["Casos Confirmados"]),
+            fechaCaso:          item["fechaCaso"]
+        })
+    }
+    const result = await bulk.execute();
+    return result;
+    
 }
 
-const readAllFiles = (dirname) => {
+const readAllFiles = dirname => {
+
     return new Promise((res, rej) => {
       fs.readdir(dirname, (error, filenames) => {
         if (error) {
@@ -34,9 +53,11 @@ const readAllFiles = (dirname) => {
         }
       });
     });
+
 };
 
 module.exports = {
     convertAllToJson,
-    readAllFiles
+    readAllFiles,
+    createBulkData
 }

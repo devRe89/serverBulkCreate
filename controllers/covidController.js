@@ -1,36 +1,35 @@
-
 const path = require('path');
+const { convertAllToJson, readAllFiles, createBulkData } = require('../helpers/masive-insert');
 
-const { convertAllToJson, readAllFiles } = require('../helpers/masive-insert');
-
-exports.getPrueba = (req, res) => {
-    res.status(200).json({
-        msg: 'Runnig',
-        status: 200
-    });
-}
-
-// 1. obtener lista de csv
-// 2. split fecha del nombre de cada csv
-// 3. recorrer cada csv para insertar en modelo 
 exports.getDataMasive = async (req, res) => {
 
     try {
-        
         const currentDir = path.join(__dirname, '../bases_covid/');
+        if ( !currentDir ) {
+            return res.status(404).json({
+                msg: `No se encontro la carpeta bases_covid`
+            });
+        }
         const arrayFiles = await readAllFiles(currentDir);
-        const response = await convertAllToJson(currentDir, arrayFiles);
-        
-        res.json({
-            res: response,
-        })
-
-
+        if ( !arrayFiles ) {
+            return res.status(404).json({
+                msg: `No se encontraron archivos dentro del directorio propuesto`
+            });
+        }
+        const dataCsvJson = await convertAllToJson(currentDir, arrayFiles);
+        if ( !dataCsvJson ) {
+            return res.status(400).json({
+                msg: `No se genero ninguna informaciòn a partir del recorrido de los csv`
+            });
+        }
+        const result = await createBulkData(dataCsvJson);
+        return res.status(200).json({
+            result,
+        });
     } catch (error) {
-        
+        return res.status(500).json({
+            error: error.response,
+        })
     }
-
-
-
 
 }
