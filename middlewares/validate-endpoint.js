@@ -8,8 +8,7 @@ const validateInputs = endpoint => {
                 header('comuna', 'Campo es de tipo entero').isNumeric(),
                 header('month', 'Campo requerido').not().isEmpty(),
                 header('month').custom((month) => validateFormat(month)),
-            ]
-            
+            ]  
         default:
             return;
     }        

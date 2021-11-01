@@ -1,6 +1,12 @@
 const path = require('path');
-const { convertAllCasesToJson, readAllFiles, createBulkDataCases, convertAllComunasToJson, createBulkDataComunas } = require('../helpers/masive-insert');
+const { convertAllCasesToJson, 
+        readAllFiles, 
+        createBulkDataCases, 
+        convertAllComunasToJson, 
+        createBulkDataComunas 
+    } = require('../helpers/masive-insert');
 const ConfirmedCase = require('../models/ConfirmedCase');
+const Comuna = require('../models/Comuna');
 
 exports.getAllComunas = async (req, res) => {
 
@@ -34,6 +40,7 @@ exports.getAllComunas = async (req, res) => {
             status: 500
         });
     }
+
 }
 
 exports.getDataMasive = async (req, res) => {
@@ -65,6 +72,29 @@ exports.getDataMasive = async (req, res) => {
         return res.status(500).json({
             error: error.response,
         })
+    }
+
+}
+
+exports.getAllComunas = async (req, res) => {
+
+    try {
+        const comunas = await Comuna.find();
+        if ( !comunas ) {
+            return res.status(404).json({
+                status: 404,
+                msg: 'No hay comunas para cargar'
+            });
+        } 
+        return res.status(200).json({
+            status: 200,
+            comunas  
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            msg: error
+        });
     }
 
 }

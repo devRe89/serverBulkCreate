@@ -6,4 +6,8 @@ router.post('/',
     covidController.getAllComunas
 );
 
+router.get('/',
+    covidController.getAllComunas
+);
+
 module.exports = router;
