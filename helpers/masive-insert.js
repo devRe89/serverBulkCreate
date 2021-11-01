@@ -1,8 +1,9 @@
 const fs = require('fs');
 const csv = require('csvtojson');
 const ConfirmedCase = require('../models/ConfirmedCase');
+const Comuna = require('../models/Comuna');
 
-const convertAllToJson = ( currentDir , [...arrayFiles] ) => {
+const convertAllCasesToJson = ( currentDir , [...arrayFiles] ) => {
 
     return new Promise ((res, rej) => {
         let resCsv = [];
@@ -23,7 +24,40 @@ const convertAllToJson = ( currentDir , [...arrayFiles] ) => {
 
 }
 
-const createBulkData = async arrayJson => {
+const convertAllComunasToJson = (currentDir , [...arrayFiles]) => {
+
+    return new Promise ((res, rej) => {
+        let resCsv = [];
+        arrayFiles.map( ( file ) => {
+            const fullUrl = currentDir + file;
+            csv()
+                .fromFile(fullUrl)
+                .subscribe( jsonCsv => {
+                    resCsv.push(jsonCsv);
+                })
+                .then(() => {
+                    res(resCsv);
+                });
+        });
+    }).catch(err =>{ throw err} );
+
+}
+
+const createBulkDataComunas = async arrayJson => {
+    
+    const bulk = Comuna.collection.initializeOrderedBulkOp();
+    for (const item of arrayJson) {
+        bulk.insert({
+            id_comuna:   Number(item["id_comuna"]),
+            nombre:      item["nombre"],
+        })
+    }
+    const result = await bulk.execute();
+    return result;
+    
+}
+
+const createBulkDataCases = async arrayJson => {
     
     const bulk = ConfirmedCase.collection.initializeOrderedBulkOp();
     for (const item of arrayJson) {
@@ -34,7 +68,7 @@ const createBulkData = async arrayJson => {
             codigo_comuna:      Number(item["Codigo comuna"]),
             poblacion:          Number(item["Poblacion"]),
             casos_confirmados:  Number(item["Casos Confirmados"]),
-            fechaCaso:          item["fechaCaso"]
+            fechaCaso:          new Date(item["fechaCaso"])
         })
     }
     const result = await bulk.execute();
@@ -57,7 +91,9 @@ const readAllFiles = dirname => {
 };
 
 module.exports = {
-    convertAllToJson,
+    convertAllCasesToJson,
     readAllFiles,
-    createBulkData
+    createBulkDataCases,
+    convertAllComunasToJson,
+    createBulkDataComunas
 }

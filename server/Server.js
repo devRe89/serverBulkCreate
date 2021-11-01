@@ -25,6 +25,7 @@ class Server {
 
     routes(){
         this.app.use('/data-covid', require('../routes/covid'));
+        this.app.use('/data-comunas', require('../routes/comunas'));
     }
 
     listen(){
