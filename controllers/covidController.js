@@ -69,19 +69,24 @@ exports.getDataMasive = async (req, res) => {
 
 }
 
-exports.getCasesByComunaAndFecha = async (req, res) => {
+exports.getCasesByComunaAndDate = async (req, res) => {
 
     try {
         const {comuna, month} = req.headers; 
-        const start = `${month}-01`;
-        const end = `${month}-31`;
-        const cases = await ConfirmedCase.find({ fechaCaso: { $gte: start, $lte: end }, codigo_comuna : Number(comuna) }, {casos_confirmados: 1, fechaCaso: 1});
+        const cases = await ConfirmedCase.find({ fechaCaso: { $gte: `${month}-01`, $lte: `${month}-31` }, codigo_comuna : Number(comuna) }, {casos_confirmados: 1, fechaCaso: 1});
+        if ( !cases ){
+            return res.status(404).json({
+                status: 404,
+                msg: 'No hay casos confirmados en el mes seleccionado'
+            });
+        }
         return res.status(200).json({
             status: 200,
             cases, 
         });
     } catch (error) {
         return res.status(500).json({
+            status: 500,
             msg: error
         });
     }

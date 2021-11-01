@@ -10,7 +10,7 @@ router.post('/',
 router.get('/', 
     validateInputs('confirmed-cases'),
     showErrors,
-    covidController.getCasesByComunaAndFecha
+    covidController.getCasesByComunaAndDate
 );
 
 module.exports = router;
